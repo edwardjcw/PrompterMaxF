@@ -3,27 +3,18 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:Prompter;assembly=Prompter"
         xmlns:local="clr-namespace:PrompterMaxF"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        d:DataContext="{x:Static vm:AppMain.mainDesignVm}"
+        Title="MainWindow" Height="150" Width="500">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="1*" />
-        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
         </Grid.RowDefinitions>
-        <Label Grid.Row="0" Grid.Column="0" Content="Input path: "/>
-        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding InputPath}"/>
-        <Label Grid.Row="1" Grid.Column="0" Content="Output path: "/>
-        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding OutputPath}" />
-        <Label Grid.Row="2" Grid.Column="0" Content="Version: "/>
-        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Version}" />
-        <Button Grid.Row="3" Grid.Column="0" Command="{Binding CreatePrompts}" Content="Create Prompts" />
-        <Label Grid.Row="3" Grid.Column="1" Content="{Binding Done}" />
+        <Button Grid.Row="0" Content="Create Prompts" Command="{Binding ExtractorShow}"/>
+        <Button Grid.Row="1" Content="Prompter" Command="{Binding ExtractorClose}"/>
+
     </Grid>
 </Window>

@@ -10,6 +10,7 @@
     <Compile Include="Prompter.fs" />
     <Compile Include="Extractor.fs" />
     <Compile Include="ExtractorMVU.fs" />
+    <Compile Include="AppMVU.fs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,6 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
 </Project>
