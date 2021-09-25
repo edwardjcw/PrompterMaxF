@@ -1,21 +1,22 @@
 ﻿namespace Prompter
 
 open System
-open ExtractorModel
 open Elmish.WPF
 open System.Windows
 
 module AppModel =
     type App = {
         ExtractorWindowState: WindowState<ExtractorModel.Model>
+        ExtractorModel: ExtractorModel.Model
     }
 
     type AppMsg = 
         | ExtractorShow
         | ExtractorHide
         | ExtractorClose
+        | ExtractorMsg of ExtractorModel.Msg
 
-    let init () = {ExtractorWindowState=WindowState.Closed}
+    let init () = {ExtractorWindowState=WindowState.Closed; ExtractorModel=ExtractorModel.init ()}
 
 module AppUpdate =
     open AppModel
@@ -24,11 +25,12 @@ module AppUpdate =
         | ExtractorShow -> {m with ExtractorWindowState=ExtractorModel.init() |> WindowState.Visible}
         | ExtractorHide -> {m with ExtractorWindowState=ExtractorModel.init() |> WindowState.Hidden}
         | ExtractorClose -> {m with ExtractorWindowState=WindowState.Closed}
+        | ExtractorMsg msg' -> {m with ExtractorModel=ExtractorUpdate.update msg' m.ExtractorModel}
 
 module AppView =
     open AppModel
-    open ExtractorView
-    let extractorWindowBindings () = []
+    let extractorWindowBindings () = 
+        ["Extractor" |> Elmish.WPF.Binding.subModel ((fun m -> m.ExtractorModel), snd, ExtractorMsg, ExtractorView.bindings)] 
 
     let mainBindings (createExtractorWindow: unit -> #Window) () : Binding<App, AppMsg> list = [
         "ExtractorShow" |> Binding.cmd ExtractorShow

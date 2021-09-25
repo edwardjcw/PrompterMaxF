@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:Prompter;assembly=Prompter"
-        xmlns:local="clr-namespace:PrompterMaxF"
         mc:Ignorable="d"
         d:DataContext="{x:Static vm:AppMain.extractorWindowDesignVm}"
         Title="Extractor" Height="150" Width="500" WindowStyle="None">
@@ -20,12 +19,12 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Label Grid.Row="0" Grid.Column="0" Content="Input path: "/>
-        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding InputPath}"/>
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding InputPath}" DataContext="{Binding Extractor}"/>
         <Label Grid.Row="1" Grid.Column="0" Content="Output path: "/>
-        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding OutputPath}" />
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding OutputPath}" DataContext="{Binding Extractor}" />
         <Label Grid.Row="2" Grid.Column="0" Content="Version: "/>
-        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Version}" />
-        <Button Grid.Row="3" Grid.Column="0" Command="{Binding CreatePrompts}" Content="Create Prompts" />
-        <Label Grid.Row="3" Grid.Column="1" Content="{Binding Done}" />
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Version}" DataContext="{Binding Extractor}" />
+        <Button Grid.Row="3" Grid.Column="0" Command="{Binding CreatePrompts}" Content="Create Prompts"  DataContext="{Binding Extractor}" />
+        <Label Grid.Row="3" Grid.Column="1" Content="{Binding Done}"  DataContext="{Binding Extractor}" />
     </Grid>
 </Window>
