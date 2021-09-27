@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Compile Include="Prompter.fs" />
+    <Compile Include="PrompterMVU.fs" />
     <Compile Include="Extractor.fs" />
     <Compile Include="ExtractorMVU.fs" />
     <Compile Include="AppMVU.fs" />

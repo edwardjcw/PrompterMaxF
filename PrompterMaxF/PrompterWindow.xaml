@@ -29,15 +29,15 @@
         <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding MetadataPath}" DataContext="{Binding Prompter}" VerticalAlignment="Center"/>
         <Label Grid.Row="1" Grid.Column="0" Content="Wav Directory: " VerticalAlignment="Center"/>
         <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding WavDirectory}" DataContext="{Binding Prompter}" VerticalAlignment="Center" />
-        <Button Grid.Row="2" Grid.Column="5" Content="Load" Command="{Binding LoadCommand}" VerticalAlignment="Center"/>
-        <Label Grid.Row="3" Grid.ColumnSpan="6" Content="{Binding Previous}"  DataContext="{Binding Prompter}" BorderThickness="1,1,1,1" BorderBrush="Black" FontSize="14" Opacity="0.5" />
-        <Label Grid.Row="4" Grid.ColumnSpan="6" Content="{Binding Current}"  DataContext="{Binding Prompter}" BorderThickness="1,1,1,1" BorderBrush="Black" FontSize="18" />
-        <Label Grid.Row="5" Grid.ColumnSpan="6" Content="{Binding Next}"  DataContext="{Binding Prompter}" BorderThickness="1,1,1,1" BorderBrush="Black" FontSize="14" Opacity="0.5" />
-        <Button Grid.Row="6" Grid.Column="0" Content="{Binding PlayButtonText}" Command="{Binding PlayCommand}" IsEnabled="{Binding PlayButtonEnabled}" DataContext="{Binding Prompter}" />
-        <Button Grid.Row="6" Grid.Column="1" Content="{Binding RecordButtonText}" Command="{Binding RecordCommand}" IsEnabled="{Binding RecordButtonEnabled}" DataContext="{Binding Prompter}" />
+        <Button Grid.Row="2" Grid.Column="5" Content="Load" Command="{Binding LoadPrompts}" VerticalAlignment="Center"/>
+        <Label Grid.Row="3" Grid.ColumnSpan="6" Content="{Binding PreviousText}"  DataContext="{Binding Prompter}" BorderThickness="1,1,1,1" BorderBrush="Black" FontSize="14" Opacity="0.5" />
+        <Label Grid.Row="4" Grid.ColumnSpan="6" Content="{Binding CurrentText}"  DataContext="{Binding Prompter}" BorderThickness="1,1,1,1" BorderBrush="Black" FontSize="18" />
+        <Label Grid.Row="5" Grid.ColumnSpan="6" Content="{Binding NextText}"  DataContext="{Binding Prompter}" BorderThickness="1,1,1,1" BorderBrush="Black" FontSize="14" Opacity="0.5" />
+        <Button Grid.Row="6" Grid.Column="0" Content="{Binding PlayButtonText}" Command="{Binding PlayAudio}" IsEnabled="{Binding PlayButtonEnabled}" DataContext="{Binding Prompter}" />
+        <Button Grid.Row="6" Grid.Column="1" Content="{Binding RecordButtonText}" Command="{Binding RecordAudio}" IsEnabled="{Binding RecordButtonEnabled}" DataContext="{Binding Prompter}" />
         <CheckBox Grid.Row="6" Grid.Column="2" Content="Auto Advance" IsChecked="{Binding AutoAdvanceChecked}" IsEnabled="{Binding AutoAdvanceEnabled}" DataContext="{Binding Prompter}" VerticalAlignment="Center" />
-        <Button Grid.Row="6" Grid.Column="4" Content="Previous" Command="{Binding PreviousCommand}" IsEnabled="{Binding PreviousButtonEnabled}" DataContext="{Binding Prompter}" />
-        <Button Grid.Row="6" Grid.Column="5" Content="Next" Command="{Binding NextCommand}" IsEnabled="{Binding NextButtonEnabled}" DataContext="{Binding Prompter}" />
+        <Button Grid.Row="6" Grid.Column="4" Content="Previous" Command="{Binding PreviousPrompt}" IsEnabled="{Binding PreviousButtonEnabled}" DataContext="{Binding Prompter}" />
+        <Button Grid.Row="6" Grid.Column="5" Content="Next" Command="{Binding NextPrompt}" IsEnabled="{Binding NextButtonEnabled}" DataContext="{Binding Prompter}" />
         <TextBox Grid.Row="7" Grid.Column="4" Text="{Binding GotoIndexOf}" IsEnabled="{Binding GotoIndexOfEnabled}" DataContext="{Binding Prompter}" HorizontalAlignment="Right" />
         <Label Grid.Row="7" Grid.Column="5" Content="{Binding GotoOutOf}" DataContext="{Binding Prompter}" HorizontalAlignment="Left" />
     </Grid>
