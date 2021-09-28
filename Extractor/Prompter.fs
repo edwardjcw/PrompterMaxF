@@ -67,6 +67,8 @@ module Carrier =
         Current: Location
     }
 
+    let emptyPrompts = {Prompts=[]; Current=None}
+
     let addStartEndBuffer prompts = emptyPrompt::prompts@[emptyPrompt]
 
     let prompted = function
