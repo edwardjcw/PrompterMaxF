@@ -21,7 +21,7 @@ namespace PrompterMaxF
         private void App_Activated(object sender, EventArgs e)
         {
             Activated -= App_Activated;
-            Prompter.AppMain.main(MainWindow, () => new ExtractorWindow());
+            Prompter.AppMain.main(MainWindow, () => new ExtractorWindow(), () => new PrompterWindow());
         }
     }
 }

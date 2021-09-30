@@ -104,3 +104,13 @@ module PrompterView =
         "GotoIndexOfEnabled" |> Binding.oneWay (fun m -> m.GotoIndexOfEnabled)
         "GotoOutOf" |> Binding.oneWay (fun m -> m.GotoOutOf)
     ]
+
+module PrompterMain =
+    open Elmish.WPF
+    open PrompterModel
+    open PrompterUpdate
+    open PrompterView
+    let main window =
+        let config = ElmConfig.Default
+        Program.mkSimpleWpf init update bindings
+        |> Program.startElmishLoop config window

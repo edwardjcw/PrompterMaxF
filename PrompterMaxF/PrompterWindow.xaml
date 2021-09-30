@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PrompterMaxF"
         mc:Ignorable="d"
-        Title="PrompterWindow" Height="250" Width="575" WindowStyle="None">
+        Title="PrompterWindow" Height="300" Width="575" WindowStyle="None">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" MinWidth="93" />
@@ -29,7 +29,7 @@
         <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding MetadataPath}" DataContext="{Binding Prompter}" VerticalAlignment="Center"/>
         <Label Grid.Row="1" Grid.Column="0" Content="Wav Directory: " VerticalAlignment="Center"/>
         <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding WavDirectory}" DataContext="{Binding Prompter}" VerticalAlignment="Center" />
-        <Button Grid.Row="2" Grid.Column="5" Content="Load" Command="{Binding LoadPrompts}" VerticalAlignment="Center"/>
+        <Button Grid.Row="2" Grid.Column="5" Content="Load" Command="{Binding LoadPrompts}" DataContext="{Binding Prompter}" VerticalAlignment="Center"/>
         <Label Grid.Row="3" Grid.ColumnSpan="6" Content="{Binding PreviousText}"  DataContext="{Binding Prompter}" BorderThickness="1,1,1,1" BorderBrush="Black" FontSize="14" Opacity="0.5" />
         <Label Grid.Row="4" Grid.ColumnSpan="6" Content="{Binding CurrentText}"  DataContext="{Binding Prompter}" BorderThickness="1,1,1,1" BorderBrush="Black" FontSize="18" />
         <Label Grid.Row="5" Grid.ColumnSpan="6" Content="{Binding NextText}"  DataContext="{Binding Prompter}" BorderThickness="1,1,1,1" BorderBrush="Black" FontSize="14" Opacity="0.5" />
