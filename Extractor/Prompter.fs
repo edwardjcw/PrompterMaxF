@@ -1,8 +1,8 @@
 ﻿namespace Prompter
 
+open System.IO
+
 module Prompt =
-    open System.IO
-    
     type Prompt = {
         Id: int
         Name: string
@@ -20,25 +20,23 @@ module Prompt =
     }
 
 
-    let loadPrompts promptFile wavDirectory =
+    let loadPrompts wavDirectory promptFile=
         let wavConstruction directory filename = Path.Combine(directory, $"{filename}.wav")
-        
+
         promptFile 
         |> File.ReadAllLines
         |> Array.map (fun rawPrompt -> rawPrompt.Split('|'))
-        |> Array.filter (fun parts -> parts.Length <> 3)
+        |> Array.filter (fun parts -> parts.Length = 3)
         |> Array.mapi (fun i parts -> {
             Id=i 
             Name=parts.[0]
             Transcription=parts.[1] 
             Normalized=parts.[2]
-            WavPath=(parts.[3] |> wavConstruction wavDirectory)
+            WavPath=(parts.[0] |> wavConstruction wavDirectory)
             })
         |> Array.toList
 
-
 module Carrier =
-    open System.IO
     open Prompt
 
     type Direction =
@@ -138,3 +136,59 @@ module Carrier =
                             if c.WavPath |> File.Exists then looper r f
                             else looper r result
         looper prompts (prompts |> List.item 0)
+
+    let previousText = function 
+        | Beginning {Previous=p}
+        | Middle {Previous=p}
+        | End {Previous=p}
+        | All {Previous=p} -> p.Normalized
+        | Error | None -> ""
+
+    let currentText = function 
+        | Beginning {Current=c}
+        | Middle {Current=c}
+        | End {Current=c}
+        | All {Current=c} -> c.Normalized
+        | Error | None -> ""
+
+    let nextText = function 
+        | Beginning {Next=n}
+        | Middle {Next=n}
+        | End {Next=n}
+        | All {Next=n} -> n.Normalized
+        | Error | None -> ""
+
+    let wavExists = function
+        | Beginning {Current=c}
+        | Middle {Current=c}
+        | End {Current=c}
+        | All {Current=c} -> c.WavPath |> File.Exists
+        | Error | None -> false
+
+    let hasPrevious = function 
+        | Beginning _ -> false
+        | Middle _ -> true
+        | End _ -> true
+        | All _ -> false
+        | Error | None -> false
+
+    let hasNext = function 
+        | Beginning _ -> true
+        | Middle _ -> true
+        | End _ -> false
+        | All _ -> false
+        | Error | None -> false
+
+    let currentIndex = function
+        | Beginning {Current=c}
+        | Middle {Current=c}
+        | End {Current=c}
+        | All {Current=c} -> (c.Id + 1).ToString() 
+        | Error | None -> "0"
+
+    let hasGotoIndex = function
+        | Beginning _
+        | Middle _
+        | End _ -> true
+        | All _ -> false 
+        | Error | None -> false

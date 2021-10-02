@@ -60,22 +60,43 @@ module PrompterUpdate =
         | true,int -> Some int
         | _ -> None
 
+    let promptDisplay (prompts:Carrier.Prompts) m' =
+        let previousText = prompts.Current |> Carrier.previousText
+        let currentText = prompts.Current |> Carrier.currentText
+        let nextText = prompts.Current |> Carrier.nextText
+
+        {m' with 
+            Prompts=prompts
+            PreviousText = previousText
+            CurrentText = currentText
+            NextText = nextText
+            PlayButtonEnabled = prompts.Current |> Carrier.wavExists
+            RecordButtonEnabled = currentText.Trim() <> ""
+            AutoAdvanceEnabled = currentText.Trim() <> ""
+            PreviousButtonEnabled = prompts.Current |> Carrier.hasPrevious
+            NextButtonEnabled = prompts.Current |> Carrier.hasNext
+            GotoIndexOf = prompts.Current |> Carrier.currentIndex
+            GotoIndexOfEnabled = prompts.Current |> Carrier.hasGotoIndex
+            GotoOutOf = $" of {prompts.Prompts.Length}"} 
+
     let update msg m =
         match msg with
         | LoadPrompts -> 
-            let prompts = m.MetadataPath |> Carrier.prompts m.WavDirectory
-            {m with Prompts=prompts}
+            m |> promptDisplay (m.MetadataPath |> Carrier.prompts m.WavDirectory)
         | PlayAudio | RecordAudio -> m // not implemented yet
         | PreviousPrompt -> 
-            {m with Prompts=Carrier.previous m.Prompts}
+            m |> promptDisplay (Carrier.previous m.Prompts)
         | NextPrompt ->
-            {m with Prompts=Carrier.next m.Prompts}
+            m |> promptDisplay (Carrier.next m.Prompts)
         | SetMetadataPath s -> {m with MetadataPath=s}
         | SetWavDirectory s -> {m with WavDirectory=s}
         | SetAutoAdvanceChecked b -> {m with AutoAdvanceChecked=b}
         | SetGotoIndexOf s -> 
             match s with
-            | Int i -> {m with GotoIndexOf=s; Prompts=Carrier.goto i m.Prompts }
+            | Int i -> 
+                let prompts = Carrier.goto (i-1) m.Prompts
+                if prompts = m.Prompts then m // if it's the same prompt, then either the goto is bad or nothing's changed
+                else m |> promptDisplay prompts // only accept a change if goto is good
             | _ -> m
 
 module PrompterView =
