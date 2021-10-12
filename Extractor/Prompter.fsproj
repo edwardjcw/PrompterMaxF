@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="AudioPlayback.fs" />
     <Compile Include="Prompter.fs" />
     <Compile Include="PrompterMVU.fs" />
     <Compile Include="Extractor.fs" />
@@ -16,6 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="Elmish.WPF" Version="3.5.8" />
+    <PackageReference Include="NAudio" Version="2.0.1" />
     <PackageReference Include="System.Speech" Version="5.0.0" />
   </ItemGroup>
 
