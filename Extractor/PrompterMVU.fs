@@ -19,6 +19,7 @@ module PrompterModel =
         GotoIndexOfEnabled: bool
         GotoOutOf: string
         Prompts: Carrier.Prompts
+        AudioPlayback: Player
     }
 
     let init() = {
@@ -39,6 +40,7 @@ module PrompterModel =
         GotoIndexOfEnabled = false
         GotoOutOf = " of 000000"
         Prompts = Carrier.emptyPrompts
+        AudioPlayback = Player.player
     }
 
     type Msg =
@@ -60,6 +62,7 @@ module PrompterUpdate =
         | true,int -> Some int
         | _ -> None
 
+    // handles showing of the prompts and effects of navigating them
     let promptDisplay (prompts:Carrier.Prompts) m' =
         let previousText = prompts.Current |> Carrier.previousText
         let currentText = prompts.Current |> Carrier.currentText
@@ -83,7 +86,8 @@ module PrompterUpdate =
         match msg with
         | LoadPrompts -> 
             m |> promptDisplay (m.MetadataPath |> Carrier.prompts m.WavDirectory)
-        | PlayAudio | RecordAudio -> m // not implemented yet
+        | PlayAudio -> m.AudioPlayback.PlayOrStop (m.Prompts.Current |> Carrier.wav) |> ignore; m
+        | RecordAudio -> m // not implemented yet
         | PreviousPrompt -> 
             m |> promptDisplay (Carrier.previous m.Prompts)
         | NextPrompt ->
@@ -109,7 +113,7 @@ module PrompterView =
         "PreviousText" |> Binding.oneWay (fun m -> m.PreviousText)
         "CurrentText" |> Binding.oneWay (fun m -> m.CurrentText)
         "NextText" |> Binding.oneWay (fun m -> m.NextText)
-        "PlayButtonText" |> Binding.oneWay (fun m -> m.PlayButtonText)
+        "PlayButtonText" |> Binding.oneWay (fun m -> m.AudioPlayback.Status)
         "PlayAudio" |> Binding.cmd (fun m -> PlayAudio)
         "PlayButtonEnabled" |> Binding.oneWay (fun m -> m.PlayButtonEnabled)
         "RecordButtonText" |> Binding.oneWay (fun m -> m.RecordButtonText)

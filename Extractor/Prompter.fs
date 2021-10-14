@@ -192,3 +192,13 @@ module Carrier =
         | End _ -> true
         | All _ -> false 
         | Error | None -> false
+
+    let wav current =
+        let exists = current |> wavExists
+        if exists |> not then Option.None
+        else match current with
+                | Beginning {Current=c}
+                | Middle {Current=c}
+                | End {Current=c}
+                | All {Current=c} -> Some (c.WavPath)
+                | Error | None -> Option.None

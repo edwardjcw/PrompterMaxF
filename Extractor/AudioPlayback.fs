@@ -1,20 +1,20 @@
 ﻿namespace Prompter
 open NAudio.Wave
 
-type State =
+type PlayerState =
     | Playing
     | Stopped
 
-type Message =
+type PlayerMessage =
     //| PlaybackStopped of StoppedEventArgs
     | Play of string
     | Stop
-    | Replier of AsyncReplyChannel<State>
+    | Replier of AsyncReplyChannel<PlayerState>
 
-type private Player() =
+type Player() =
     
-    let looper (input: MailboxProcessor<Message>) =
-        let rec looper' player (reader:AudioFileReader option) (state: State) = 
+    let looper (input: MailboxProcessor<PlayerMessage>) =
+        let rec looper' player (reader:AudioFileReader option) (state: PlayerState) = 
             async {
                 let! message = input.Receive()
                 match message, state with
@@ -23,7 +23,7 @@ type private Player() =
                     let reader' = new AudioFileReader(p)
                     let player' = new WaveOutEvent()
                     player'.Init(reader')
-                    player'.PlaybackStopped.Add(fun _ -> reader'.Dispose())
+                    player'.PlaybackStopped.Add(fun _ -> reader'.Dispose(); do! looper' (Some player') (Some reader') Stopped)
                     player'.Play()
                     do! looper' (Some player') (Some reader') Playing
                 | Stop, Stopped -> do! looper' player reader state
@@ -33,17 +33,36 @@ type private Player() =
                         player'.Stop() 
                         do! looper' player reader Stopped
                     | None -> do! looper' player reader Stopped
-                | Replier replyChannel, _ -> replyChannel.Reply(state)
+                | Replier replyChannel, _ -> replyChannel.Reply(state); do! looper' player reader state
             }
         looper' None None Stopped
 
-    let agent = MailboxProcessor<Message>.Start(looper)
+    let agent = MailboxProcessor<PlayerMessage>.Start(looper)
 
-    member _.Play (wavPath:string) =
+    let play (wavPath:string) =
         agent.Post(Play wavPath)
 
-    member _.Stop =
+    let stop () =
         agent.Post(Stop)
 
-    member _.Status =
-        agent.PostAndReply(Replier)
+    member _.PlayOrStop (wavPath: string option) = 
+        let response = agent.TryPostAndReply(Replier,500)
+        match response, wavPath with
+        | Some Playing, _ -> stop()
+        | None, _
+        | Some Stopped, None -> ()
+        | Some Stopped, Some w -> play(w)
+
+    member _.Status = 
+        let response = agent.TryPostAndReply(Replier, 500)
+        match response with
+        | None -> "Play"
+        | Some Playing -> "Stop"
+        | Some Stopped -> "Play"
+
+
+
+module Player =
+    let player = Player()
+    let playOrStop = player.PlayOrStop
+    let status = player.Status

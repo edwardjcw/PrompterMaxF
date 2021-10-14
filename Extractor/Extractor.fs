@@ -5,9 +5,9 @@ open System.Speech.Synthesis
 
 type private Last = {stopIndex:int; audioOffset:System.TimeSpan; phraseAudioOffset:System.TimeSpan}
 type private Phrase = string 
-type private State = {last:Last; phrases:Phrase list}
+type private ExtractorState = {last:Last; phrases:Phrase list}
 
-type Message =
+type ExtractorMessage =
     | Replier of AsyncReplyChannel<Phrase list>
     | Progress of SpeakProgressEventArgs
     | Complete of SpeakCompletedEventArgs
@@ -22,8 +22,8 @@ type private Extractor(text:string) =
         // the longer the phrase is running, the less duration difference needed to trigger the end of a phrase
         System.TimeSpan.FromMilliseconds((-0.053 * difference.TotalMilliseconds) + maxPauseLength)
     
-    let looper (input: MailboxProcessor<Message>) =
-        let rec looper' (state: State) = 
+    let looper (input: MailboxProcessor<ExtractorMessage>) =
+        let rec looper' (state: ExtractorState) = 
             async {
                 let! message = input.Receive()
                 match message with 
@@ -49,7 +49,7 @@ type private Extractor(text:string) =
 
     member _.Extracted() =
         let synth = new SpeechSynthesizer()
-        let agent = MailboxProcessor<Message>.Start(looper)
+        let agent = MailboxProcessor<ExtractorMessage>.Start(looper)
         let progressHandler (arg: SpeakProgressEventArgs) = agent.Post (Progress arg) |> ignore
         let completeHandler (arg: SpeakCompletedEventArgs) = agent.Post (Complete arg) |> ignore
         synth.SpeakProgress.Add(progressHandler)
