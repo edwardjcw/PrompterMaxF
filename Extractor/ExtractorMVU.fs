@@ -35,11 +35,11 @@ module ExtractorView =
     open Elmish.WPF
     open ExtractorModel
     let bindings () = [
-        "InputPath" |> Binding.twoWay ((fun m -> m.InputPath), (fun newVal m -> newVal |> SetInputPath))
-        "OutputPath" |> Binding.twoWay ((fun m -> m.OutputPath), (fun newVal m -> newVal |> SetOutputPath))
-        "Version" |> Binding.twoWay ((fun m -> uint m.Version), (fun newVal m -> uint newVal |> SetVersion))
+        "InputPath" |> Binding.twoWay ((fun m -> m.InputPath), (fun newVal _ -> newVal |> SetInputPath))
+        "OutputPath" |> Binding.twoWay ((fun m -> m.OutputPath), (fun newVal _ -> newVal |> SetOutputPath))
+        "Version" |> Binding.twoWay ((fun m -> uint m.Version), (fun newVal _ -> uint newVal |> SetVersion))
         "Done" |> Binding.oneWay (fun m -> m.Done)
-        "CreatePrompts" |> Binding.cmd (fun m -> CreatePrompts)
+        "CreatePrompts" |> Binding.cmd (fun _ -> CreatePrompts)
     ]
 
 module ExtractorMain =

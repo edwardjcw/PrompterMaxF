@@ -50,8 +50,8 @@ type private Extractor(text:string) =
     member _.Extracted() =
         let synth = new SpeechSynthesizer()
         let agent = MailboxProcessor<ExtractorMessage>.Start(looper)
-        let progressHandler (arg: SpeakProgressEventArgs) = agent.Post (Progress arg) |> ignore
-        let completeHandler (arg: SpeakCompletedEventArgs) = agent.Post (Complete arg) |> ignore
+        let progressHandler (arg: SpeakProgressEventArgs) = agent.Post (Progress arg)
+        let completeHandler (arg: SpeakCompletedEventArgs) = agent.Post (Complete arg)
         synth.SpeakProgress.Add(progressHandler)
         synth.SpeakCompleted.Add(completeHandler)
         synth.SetOutputToNull()

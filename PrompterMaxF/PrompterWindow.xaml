@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PrompterMaxF"
         mc:Ignorable="d"
-        Title="PrompterWindow" Height="400" Width="650" WindowStyle="None">
+        Title="PrompterWindow" Height="400" Width="650" WindowStyle="None" d:DataContext="{d:DesignInstance }">
     <Grid HorizontalAlignment="Center" Width="650" Height="400" VerticalAlignment="Top">
         <Grid.ColumnDefinitions>
             <ColumnDefinition MinWidth="93" />
@@ -30,15 +30,15 @@
         <Label Grid.Row="1" Grid.Column="0" Content="Wav Directory: " VerticalAlignment="Center"/>
         <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="5" Text="{Binding WavDirectory}" DataContext="{Binding Prompter}" VerticalAlignment="Center" />
         <Button Grid.Row="2" Grid.Column="5" Content="Load" Command="{Binding LoadPrompts}" DataContext="{Binding Prompter}" VerticalAlignment="Center"/>
-        <TextBlock Grid.Row="3" Grid.ColumnSpan="6" Text="{Binding PreviousText}"  DataContext="{Binding Prompter}" FontSize="14" Opacity="0.5" TextWrapping="Wrap" />
-        <TextBlock Grid.Row="4" Grid.ColumnSpan="6" Text="{Binding CurrentText}"  DataContext="{Binding Prompter}" FontSize="18" TextWrapping="Wrap" />
-        <TextBlock Grid.Row="5" Grid.ColumnSpan="6" Text="{Binding NextText}"  DataContext="{Binding Prompter}" FontSize="14" Opacity="0.5" TextWrapping="Wrap" />
+        <TextBlock Grid.Row="3" Grid.ColumnSpan="6" Grid.Column="0" Text="{Binding PreviousText}"  DataContext="{Binding Prompter}" FontSize="14" Opacity="0.5" TextWrapping="Wrap" />
+        <TextBlock Grid.Row="4" Grid.ColumnSpan="6" Grid.Column="0" Text="{Binding CurrentText}"  DataContext="{Binding Prompter}" FontSize="18" TextWrapping="Wrap" />
+        <TextBlock Grid.Row="5" Grid.ColumnSpan="6" Grid.Column="0" Text="{Binding NextText}"  DataContext="{Binding Prompter}" FontSize="14" Opacity="0.5" TextWrapping="Wrap" />
         <Button Grid.Row="6" Grid.Column="0" Content="{Binding PlayButtonText}" Command="{Binding PlayAudio}" IsEnabled="{Binding PlayButtonEnabled}" DataContext="{Binding Prompter}" />
         <Button Grid.Row="6" Grid.Column="1" Content="{Binding RecordButtonText}" Command="{Binding RecordAudio}" IsEnabled="{Binding RecordButtonEnabled}" DataContext="{Binding Prompter}" />
         <CheckBox Grid.Row="6" Grid.Column="2" Content="Auto Advance" IsChecked="{Binding AutoAdvanceChecked}" IsEnabled="{Binding AutoAdvanceEnabled}" DataContext="{Binding Prompter}" VerticalAlignment="Center" />
         <Button Grid.Row="6" Grid.Column="4" Content="Previous" Command="{Binding PreviousPrompt}" IsEnabled="{Binding PreviousButtonEnabled}" DataContext="{Binding Prompter}" />
         <Button Grid.Row="6" Grid.Column="5" Content="Next" Command="{Binding NextPrompt}" IsEnabled="{Binding NextButtonEnabled}" DataContext="{Binding Prompter}" />
         <TextBox Grid.Row="7" Grid.Column="4" Text="{Binding GotoIndexOf}" IsEnabled="{Binding GotoIndexOfEnabled}" DataContext="{Binding Prompter}" HorizontalAlignment="Right" Width="50" />
-        <Label Grid.Row="7" Grid.Column="5" Content="{Binding GotoOutOf}" DataContext="{Binding Prompter}" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <Label Grid.Row="7" Grid.Column="5" Content="{Binding GotoOutOf}" DataContext="{Binding Prompter}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
     </Grid>
 </Window>

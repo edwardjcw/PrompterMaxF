@@ -1,6 +1,7 @@
 ﻿namespace Prompter
 
 module PrompterModel =
+    open Elmish
     type Model = {
         MetadataPath: string
         WavDirectory: string
@@ -22,13 +23,29 @@ module PrompterModel =
         AudioPlayback: Player
     }
 
-    let init() = {
+    type CmdMsg = | PlayAudio of Player * string option
+
+    type Msg =
+        | LoadPrompts
+        | RequestPlayAudio
+        | PlayingAudio
+        | PlayFailed of exn
+        | RecordAudio
+        | PreviousPrompt
+        | NextPrompt
+        | SetMetadataPath of string
+        | SetWavDirectory of string
+        | SetAutoAdvanceChecked of bool
+        | SetGotoIndexOf of string
+        | SetPlayButtonText
+
+    let init() = ({
         MetadataPath = @"C:\Users\edwar\Downloads\sherlockReadable.txt"
         WavDirectory = @"C:\Users\edwar\Downloads\wavOutput"
         PreviousText = "previous"
         CurrentText = "current"
         NextText = "next"
-        PlayButtonText = "Play"
+        PlayButtonText = ""
         PlayButtonEnabled = false
         RecordButtonText = "Record"
         RecordButtonEnabled = false
@@ -41,20 +58,13 @@ module PrompterModel =
         GotoOutOf = " of 000000"
         Prompts = Carrier.emptyPrompts
         AudioPlayback = Player.player
-    }
+    }, 
+        [])
 
-    type Msg =
-        | LoadPrompts
-        | PlayAudio
-        | RecordAudio
-        | PreviousPrompt
-        | NextPrompt
-        | SetMetadataPath of string
-        | SetWavDirectory of string
-        | SetAutoAdvanceChecked of bool
-        | SetGotoIndexOf of string
+
 
 module PrompterUpdate =
+    open Elmish
     open PrompterModel
     open Prompter
     let (|Int|_|) (str:string) =
@@ -85,57 +95,80 @@ module PrompterUpdate =
     let update msg m =
         match msg with
         | LoadPrompts -> 
-            m |> promptDisplay (m.MetadataPath |> Carrier.prompts m.WavDirectory)
-        | PlayAudio -> m.AudioPlayback.PlayOrStop (m.Prompts.Current |> Carrier.wav) |> ignore; m
-        | RecordAudio -> m // not implemented yet
+            m |> promptDisplay (m.MetadataPath |> Carrier.prompts m.WavDirectory), []
+        | RequestPlayAudio -> m, [PlayAudio (m.AudioPlayback, (m.Prompts.Current |> Carrier.wav))] //m.AudioPlayback.PlayOrStop (m.Prompts.Current |> Carrier.wav) |> Async.Start; m, []
+        | PlayingAudio -> {m with PlayButtonText=m.AudioPlayback.Status}, []
+        | PlayFailed e -> failwith (e.ToString()) //not implemented yet
+        | RecordAudio -> m, [] // not implemented yet
         | PreviousPrompt -> 
-            m |> promptDisplay (Carrier.previous m.Prompts)
+            m |> promptDisplay (Carrier.previous m.Prompts), []
         | NextPrompt ->
-            m |> promptDisplay (Carrier.next m.Prompts)
-        | SetMetadataPath s -> {m with MetadataPath=s}
-        | SetWavDirectory s -> {m with WavDirectory=s}
-        | SetAutoAdvanceChecked b -> {m with AutoAdvanceChecked=b}
+            m |> promptDisplay (Carrier.next m.Prompts), []
+        | SetMetadataPath s -> {m with MetadataPath=s}, []
+        | SetWavDirectory s -> {m with WavDirectory=s}, []
+        | SetAutoAdvanceChecked b -> {m with AutoAdvanceChecked=b}, []
         | SetGotoIndexOf s -> 
             match s with
             | Int i -> 
                 let prompts = Carrier.goto (i-1) m.Prompts
-                if prompts = m.Prompts then m // if it's the same prompt, then either the goto is bad or nothing's changed
-                else m |> promptDisplay prompts // only accept a change if goto is good
-            | _ -> m
+                if prompts = m.Prompts then m, [] // if it's the same prompt, then either the goto is bad or nothing's changed
+                else m |> promptDisplay prompts, [] // only accept a change if goto is good
+            | _ -> m, []
+        | SetPlayButtonText -> {m with PlayButtonText=m.AudioPlayback.Status}, []
+
+    let playButtonSub dispatch =
+        let timer = new System.Timers.Timer(500.);
+        timer.Elapsed.Add (fun _ -> dispatch (SetPlayButtonText))
+        timer.Start()
+
+    //let buttonUse m = [playButtonSub m]
 
 module PrompterView =
     open Elmish.WPF
+    open Elmish
     open PrompterModel
     let bindings () = [
-        "MetadataPath" |> Binding.twoWay ((fun m -> m.MetadataPath), (fun newVal m -> newVal |> SetMetadataPath))
-        "WavDirectory" |> Binding.twoWay ((fun m -> m.WavDirectory), (fun newVal m -> newVal |> SetWavDirectory))
-        "LoadPrompts" |> Binding.cmd (fun m -> LoadPrompts)
+        "MetadataPath" |> Binding.twoWay ((fun m -> m.MetadataPath), (fun newVal _ -> newVal |> SetMetadataPath))
+        "WavDirectory" |> Binding.twoWay ((fun m -> m.WavDirectory), (fun newVal _ -> newVal |> SetWavDirectory))
+        "LoadPrompts" |> Binding.cmd (fun _ -> LoadPrompts)
         "PreviousText" |> Binding.oneWay (fun m -> m.PreviousText)
         "CurrentText" |> Binding.oneWay (fun m -> m.CurrentText)
         "NextText" |> Binding.oneWay (fun m -> m.NextText)
         "PlayButtonText" |> Binding.oneWay (fun m -> m.AudioPlayback.Status)
-        "PlayAudio" |> Binding.cmd (fun m -> PlayAudio)
+        "PlayAudio" |> Binding.cmd (fun _ -> RequestPlayAudio)
         "PlayButtonEnabled" |> Binding.oneWay (fun m -> m.PlayButtonEnabled)
         "RecordButtonText" |> Binding.oneWay (fun m -> m.RecordButtonText)
-        "RecordAudio" |> Binding.cmd (fun m -> RecordAudio)
+        "RecordAudio" |> Binding.cmd (fun _ -> RecordAudio)
         "RecordButtonEnabled" |> Binding.oneWay (fun m -> m.RecordButtonEnabled)
-        "AutoAdvanceChecked" |> Binding.twoWay ((fun m -> m.AutoAdvanceChecked), fun newVal m -> newVal |> SetAutoAdvanceChecked)
+        "AutoAdvanceChecked" |> Binding.twoWay ((fun m -> m.AutoAdvanceChecked), fun newVal _ -> newVal |> SetAutoAdvanceChecked)
         "AutoAdvanceEnabled" |> Binding.oneWay (fun m -> m.AutoAdvanceEnabled)
-        "PreviousPrompt" |> Binding.cmd (fun m -> PreviousPrompt)
+        "PreviousPrompt" |> Binding.cmd (fun _ -> PreviousPrompt)
         "PreviousButtonEnabled" |> Binding.oneWay (fun m -> m.PreviousButtonEnabled)
-        "NextPrompt" |> Binding.cmd (fun m -> NextPrompt)
+        "NextPrompt" |> Binding.cmd (fun _ -> NextPrompt)
         "NextButtonEnabled" |> Binding.oneWay (fun m -> m.NextButtonEnabled)
-        "GotoIndexOf" |> Binding.twoWay ((fun m -> m.GotoIndexOf), (fun newVal m -> newVal |> SetGotoIndexOf))
+        "GotoIndexOf" |> Binding.twoWay ((fun m -> m.GotoIndexOf), (fun newVal _ -> newVal |> SetGotoIndexOf))
         "GotoIndexOfEnabled" |> Binding.oneWay (fun m -> m.GotoIndexOfEnabled)
         "GotoOutOf" |> Binding.oneWay (fun m -> m.GotoOutOf)
     ]
 
+    let play (player:Player, wavFile) = async {
+        do! player.PlayOrStop wavFile
+        return PlayingAudio
+        }
+
+    let toCmd = function 
+        | PlayAudio (a, s) -> Cmd.OfAsync.either play (a, s) id PlayFailed
+
 module PrompterMain =
     open Elmish.WPF
+    open Elmish
     open PrompterModel
     open PrompterUpdate
     open PrompterView
+
     let main window =
-        let config = ElmConfig.Default
-        Program.mkSimpleWpf init update bindings
+        let config = {ElmConfig.Default with LogConsole = true; Measure = true; LogTrace = true}
+        Program.mkProgramWpfWithCmdMsg init update bindings toCmd
+        |> Program.withSubscription (fun _ -> Cmd.ofSub playButtonSub)
+        |> Program.withDebugTrace
         |> Program.startElmishLoop config window
