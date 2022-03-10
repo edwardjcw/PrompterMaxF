@@ -21,7 +21,7 @@ module AppModel =
         | PrompterHide
         | PrompterClose
         | PrompterMsg of PrompterModel.Msg
-        | PrompterAction
+        | PrompterAction of PrompterModel.Msg
         | PrompterCommandError of exn
 
     type AppCmdMsg = | PrompterCommand of PrompterModel.CmdMsg list
@@ -37,29 +37,20 @@ module AppUpdate =
     open AppModel
     open Elmish
 
-    let update msg m : App * AppCmdMsg list = 
+    let update msg m : App * Cmd<AppMsg> = 
         match msg with
-        | ExtractorShow -> {m with ExtractorWindowState=ExtractorModel.init() |> WindowState.Visible}, []
-        | ExtractorHide -> {m with ExtractorWindowState=ExtractorModel.init() |> WindowState.Hidden}, []
-        | ExtractorClose -> {m with ExtractorWindowState=WindowState.Closed}, []
-        | ExtractorMsg msg' -> {m with ExtractorModel=ExtractorUpdate.update msg' m.ExtractorModel}, []
-        | PrompterShow -> {m with PrompterWindowState=PrompterModel.init() |> fst |> WindowState.Visible}, []
-        | PrompterHide -> {m with PrompterWindowState=PrompterModel.init() |> fst |> WindowState.Hidden}, []
-        | PrompterClose -> {m with PrompterWindowState=WindowState.Closed}, []
+        | ExtractorShow -> {m with ExtractorWindowState=ExtractorModel.init() |> WindowState.Visible}, Cmd.none
+        | ExtractorHide -> {m with ExtractorWindowState=ExtractorModel.init() |> WindowState.Hidden}, Cmd.none
+        | ExtractorClose -> {m with ExtractorWindowState=WindowState.Closed}, Cmd.none
+        | ExtractorMsg msg' -> {m with ExtractorModel=ExtractorUpdate.update msg' m.ExtractorModel}, Cmd.none
+        | PrompterShow -> {m with PrompterWindowState=PrompterModel.init() |> fst |> WindowState.Visible}, Cmd.none
+        | PrompterHide -> {m with PrompterWindowState=PrompterModel.init() |> fst |> WindowState.Hidden}, Cmd.none
+        | PrompterClose -> {m with PrompterWindowState=WindowState.Closed}, Cmd.none
         | PrompterMsg msg' -> 
-            let updated = PrompterUpdate.update msg' m.PrompterModel
-            {m with PrompterModel= updated |> fst}, [PrompterCommand (updated |> snd)]
-        | PrompterAction -> m, []
+            let (updatedModel, updatedCmd) = PrompterUpdate.update msg' m.PrompterModel
+            {m with PrompterModel= updatedModel}, Cmd.map PrompterAction updatedCmd
+        | PrompterAction msg' -> m, Cmd.none
         | PrompterCommandError e -> failwith (e.ToString())
-
-    let prompterTask cmd = async {
-        cmd |> List.map (PrompterView.toCmd) |> ignore
-        return PrompterAction
-    }
-
-    let toCmd (command: AppCmdMsg) : Cmd<AppMsg> =
-        match command with
-        | PrompterCommand c -> Cmd.OfAsync.either prompterTask c id PrompterCommandError
 
 module AppView =
     open AppModel
@@ -91,6 +82,6 @@ module AppMain =
         let createPrompterWindow () = createPrompterWindow.Invoke()
         let bindings = AppView.mainBindings createExtractorWindow createPrompterWindow
         let config = {ElmConfig.Default with LogConsole = true; Measure = true; LogTrace = true}
-        Program.mkProgramWpfWithCmdMsg AppModel.init AppUpdate.update bindings AppUpdate.toCmd
+        Program.mkProgramWpf AppModel.init AppUpdate.update bindings
         |> Program.withDebugTrace
         |> Program.startElmishLoop config mainWindow
