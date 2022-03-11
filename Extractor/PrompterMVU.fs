@@ -25,10 +25,15 @@ module PrompterModel =
 
     type CmdMsg = | PlayAudio of Player * string option
 
+    type Playing =
+        | JustStarted
+        | Status
+        | Finished
+    
     type Msg =
         | LoadPrompts
         | RequestPlayAudio
-        | PlayingAudio
+        | PlayingAudio of Playing
         | PlayFailed of exn
         | RecordAudio
         | PreviousPrompt
@@ -97,13 +102,19 @@ module PrompterUpdate =
         | LoadPrompts -> 
             m |> promptDisplay (m.MetadataPath |> Carrier.prompts m.WavDirectory), Cmd.none
         | RequestPlayAudio ->
-            let play (player:Player, wavFile) = async {
-                do! player.PlayOrStop wavFile 
-                return PlayingAudio
-                }
+            let play (player:Player, wavFile) =
+                player.PlayOrStop wavFile |> Async.Start
+                PlayingAudio JustStarted
             let a, s = m.AudioPlayback, (m.Prompts.Current |> Carrier.wav)
-            m, Cmd.OfAsync.either play (a, s) id PlayFailed  //m.AudioPlayback.PlayOrStop (m.Prompts.Current |> Carrier.wav) |> Async.Start; m, []
-        | PlayingAudio -> {m with PlayButtonText=m.AudioPlayback.Status}, Cmd.none
+            m, Cmd.OfFunc.either play (a, s) id PlayFailed
+        | PlayingAudio status ->
+            match status with
+            | JustStarted -> {m with PlayButtonText="Stop"}, Cmd.ofMsg (PlayingAudio Status)
+            | Status ->
+                let status = m.AudioPlayback.Status
+                let playingStatus = if status = "Play" then Finished else Status 
+                m, Cmd.ofMsg (PlayingAudio playingStatus)
+            | Finished -> {m with PlayButtonText="Play"}, Cmd.none
         | PlayFailed e -> failwith (e.ToString()) //not implemented yet
         | RecordAudio -> m, Cmd.none // not implemented yet
         | PreviousPrompt -> 
@@ -122,10 +133,12 @@ module PrompterUpdate =
             | _ -> m, []
         | SetPlayButtonText -> {m with PlayButtonText=m.AudioPlayback.Status}, Cmd.none
 
-    let playButtonSub dispatch =
-        let timer = new System.Timers.Timer(500.);
-        timer.Elapsed.Add (fun _ -> dispatch (SetPlayButtonText))
-        timer.Start()
+    let playButtonSub _ =
+        let sub dispatch =
+            let timer = new System.Timers.Timer(500.);
+            timer.Elapsed.Add (fun _ -> dispatch (SetPlayButtonText))
+            timer.Start()
+        Cmd.ofSub sub
 
     //let buttonUse m = [playButtonSub m]
 
@@ -167,6 +180,6 @@ module PrompterMain =
     let main window =
         let config = {ElmConfig.Default with LogConsole = true; Measure = true; LogTrace = true}
         Program.mkProgramWpf init update bindings
-        //|> Program.withSubscription (fun _ -> Cmd.ofSub playButtonSub)
+        |> Program.withSubscription playButtonSub
         |> Program.withDebugTrace
         |> Program.startElmishLoop config window

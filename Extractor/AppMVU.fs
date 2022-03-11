@@ -47,8 +47,8 @@ module AppUpdate =
         | PrompterHide -> {m with PrompterWindowState=PrompterModel.init() |> fst |> WindowState.Hidden}, Cmd.none
         | PrompterClose -> {m with PrompterWindowState=WindowState.Closed}, Cmd.none
         | PrompterMsg msg' -> 
-            let (updatedModel, updatedCmd) = PrompterUpdate.update msg' m.PrompterModel
-            {m with PrompterModel= updatedModel}, Cmd.map PrompterAction updatedCmd
+            let updatedModel, updatedCmd = PrompterUpdate.update msg' m.PrompterModel
+            {m with PrompterModel= updatedModel}, Cmd.map PrompterMsg updatedCmd
         | PrompterAction msg' -> m, Cmd.none
         | PrompterCommandError e -> failwith (e.ToString())
 
